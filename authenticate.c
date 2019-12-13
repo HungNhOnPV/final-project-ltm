@@ -176,4 +176,3 @@ int logoutUser(char *username){
 	}
 	return SERVER_ERROR;
 }
-

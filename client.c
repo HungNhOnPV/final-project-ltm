@@ -14,7 +14,6 @@
 #include <sys/stat.h>
 #include <inttypes.h>
 #include "protocol.h"
-// #include "authenticate.h"
 #include "validate.h"
 #include "status.h"
 #define DATA_SIZE 1000
