@@ -16,7 +16,7 @@
 #include "validate.h"
 #include "status.h"
 
-#define PORT 5550   /* Port that will be opened */ 
+#define PORT 5550   /* Port that will be opened */
 #define BACKLOG 2   /* Number of allowed connections */
 #define MAX_SIZE 10e6 * 100
 #define STORAGE "./storage/" //default save file place
@@ -30,14 +30,22 @@ Client onlineClient[1000];
 /*
 * Init Array Client
 * Set default value for Online Client
-* @param 
+* @param
 * @return void
 */
+// void initArrayClient() {
+// 	int i;
+// 	for(i = 0; i < 1000; i++) {
+// 		onlineClient[i].requestId = 0;    //set default value 0 for requestId
+// 		onlineClient[i].uploadSuccess = 0; //set default value 0 for uploadSuccess
+// 	}
+// }
 void initArrayClient() {
-	int i;
-	for(i = 0; i < 1000; i++) {
+	int i = 0;
+	while(i < 1000) {
 		onlineClient[i].requestId = 0;    //set default value 0 for requestId
 		onlineClient[i].uploadSuccess = 0; //set default value 0 for uploadSuccess
+		i++;
 	}
 }
 /*
@@ -55,30 +63,32 @@ int numberElementsInArray(char** temp) {
 }
 /*
 * Print List Online Client
-* @param 
+* @param
 * @return void
 */
 void printListOnlineClient() {
-	int i;
-	for (i = 0; i < 1000; i++) {
+	int i = 0;
+	while(i < 1000) {
 		if(onlineClient[i].requestId > 0) {
 			printf("\n---ConnSock---: %d\n", onlineClient[i].connSock);
 			printf("---RequestId---: %d\n", onlineClient[i].requestId);
 			printf("---Username---: %s\n", onlineClient[i].username);
 		}
+		i++;
 	}
 }
 /*
 * find Avaiable Position in Array Client
-* @param 
+* @param
 * @return position i if valid else return -1
 */
 int findAvaiableElementInArrayClient() {
-	int i;
-	for (i = 0; i < 1000; i++) {
+	int i = 0;
+	while (i < 1000) {
 		if(onlineClient[i].requestId == 0) {	// avaiable position is position where requestId = 0
 			return i;
 		}
+		i++;
 	}
 	return -1; // if not have avaiable element
 }
@@ -88,11 +98,12 @@ int findAvaiableElementInArrayClient() {
 * @return position has request id if not return -1
 */
 int findClient(int requestId) {
-	int i;
-	for (i = 0; i < 1000; i++) {
+	int i = 0;
+	while (i < 1000) {
 		if(onlineClient[i].requestId == requestId) {
 			return i;
 		}
+		i++;
 	}
 	return -1;
 }
@@ -102,11 +113,12 @@ int findClient(int requestId) {
 * @return position has username if not return -1
 */
 int findClientByUsername(char* username) {
-	int i;
-	for (i = 0; i < 1000; i++) {
+	int i = 0;
+	while (i < 1000) {
 		if(!strcmp(onlineClient[i].username, username) && (onlineClient[i].requestId > 0)) {
 			return i;
 		}
+		i++;
 	}
 	return -1;
 }
@@ -147,7 +159,7 @@ void handleLogin(Message mess, int connSock) {
 				strcpy(username, userStr[1]);
 				strcpy(password, passStr[1]);
 				if(validateUsername(username) || validatePassword(password)) { // check username and password are valid
-					loginCode = login(username, password); // login with username and password 
+					loginCode = login(username, password); // login with username and password
 					if(loginCode != LOGIN_SUCCESS)
 						mess.type = TYPE_ERROR;
 					else{
@@ -269,14 +281,14 @@ void handleAuthenticateRequest(Message mess, int connSock) {
 }
 
 char* searchFileInOnlineClients(char* fileName, int requestId, char* listUser) {
-	int i;
+	int i = 0;
 	Message msg, recvMsg;
 	msg.requestId = requestId;
 	char user[200];
 	strcpy(msg.payload, fileName);
 	msg.length = strlen(msg.payload);
 	msg.type = TYPE_REQUEST_FILE;
-	for(i = 0; i < 1000; i++) {
+	while(i < 1000) {
 		if((onlineClient[i].requestId > 0) && (onlineClient[i].requestId != requestId)) {
 			sendMessage(onlineClient[i].connSock, msg);
 			receiveMessage(onlineClient[i].connSock, &recvMsg);
@@ -286,6 +298,7 @@ char* searchFileInOnlineClients(char* fileName, int requestId, char* listUser) {
 				strcat(listUser, "\n");
 			}
 		}
+		i++;
 	}
 	if(strlen(listUser) > 0) {
 		listUser[strlen(listUser) - 1] = '\0';
@@ -418,23 +431,23 @@ void* client_handler(void* conn_sock) {
 		}
 		//blocking
 		switch(recvMess.type) {
-			case TYPE_AUTHENTICATE: 
+			case TYPE_AUTHENTICATE:
 				handleAuthenticateRequest(recvMess, connSock);
 				break;
-			case TYPE_BACKGROUND: 
+			case TYPE_BACKGROUND:
 				addClientSocket(recvMess.requestId, connSock);
 				//printListOnlineClient();
 				return NULL;
 
-			case TYPE_REQUEST_FILE: 
+			case TYPE_REQUEST_FILE:
 				handleRequestFile(recvMess, connSock);
 				break;
-			case TYPE_REQUEST_DOWNLOAD: 
+			case TYPE_REQUEST_DOWNLOAD:
 				handleRequestDownload(recvMess, connSock);
 				break;
-			case TYPE_UPLOAD_FILE: 
+			case TYPE_UPLOAD_FILE:
 				break;
-			case TYPE_ERROR: 
+			case TYPE_ERROR:
 				break;
 			default: break;
 		}
@@ -452,7 +465,7 @@ int main(int argc, char **argv)
 	struct sockaddr_in client; /* client's address information */
 	int sin_size;
 	pthread_t tid;
-		
+
  	if(argc != 2) {
  		perror(" Error Parameter! Please input only port number\n ");
  		exit(0);
@@ -469,17 +482,17 @@ int main(int argc, char **argv)
 		perror("\nError: ");
 		return 0;
 	}
-	
+
 	//Step 2: Bind address to socket
 	bzero(&server, sizeof(server));
-	server.sin_family = AF_INET;         
+	server.sin_family = AF_INET;
 	server.sin_port = htons(port_number);   /* Remember htons() from "Conversions" section? =) */
-	server.sin_addr.s_addr = htonl(INADDR_ANY);  /* INADDR_ANY puts your IP address automatically */   
+	server.sin_addr.s_addr = htonl(INADDR_ANY);  /* INADDR_ANY puts your IP address automatically */
 	if(bind(listen_sock, (struct sockaddr*)&server, sizeof(server)) == -1){ /* calls bind() */
 		perror("\nError: ");
 		return 0;
-	}     
-	
+	}
+
 	//Step 3: Listen request from client
 	if(listen(listen_sock, BACKLOG) == -1){  /* calls listen() */
 		perror("\nError: ");
@@ -493,19 +506,18 @@ int main(int argc, char **argv)
 	while(1) {
 		//accept request
 		sin_size = sizeof(struct sockaddr_in);
-		if ((conn_sock = accept(listen_sock,( struct sockaddr *)&client, (unsigned int*)&sin_size)) == -1) 
+		if ((conn_sock = accept(listen_sock,( struct sockaddr *)&client, (unsigned int*)&sin_size)) == -1)
 			perror("\nError: ");
-  
 		printf("You got a connection from %s\n", inet_ntoa(client.sin_addr) ); /* prints client's IP */
-		if (pthread_mutex_init(&lock, NULL) != 0) 
-	    { 
-	        printf("\n mutex init has failed\n"); 
-	        return 1; 
-	    } 
+		if (pthread_mutex_init(&lock, NULL) != 0)
+	    {
+	        printf("\n mutex init has failed\n");
+	        return 1;
+	    }
 		//start conversation
-		pthread_create(&tid, NULL, &client_handler, &conn_sock);	
+		pthread_create(&tid, NULL, &client_handler, &conn_sock);
 	}
-	
+
 	close(listen_sock);
 	return 0;
 }

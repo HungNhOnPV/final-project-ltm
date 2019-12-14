@@ -39,7 +39,7 @@ RequestFile* search(int requestId) {
     	if(ptr->requestId == requestId) break;
         ptr = ptr->next;
     }
-    
+
 	return ptr;
 }
 
@@ -59,6 +59,7 @@ int remove(int requestId) {
 int isFileExist(char *fileName) {
 	FILE *fptr = fopen(fileName, 'r');
 	if(fptr == NULL) {
+		printf("Open not file!\n");
 		return 0;
 	}
 	return 1;

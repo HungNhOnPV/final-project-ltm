@@ -62,7 +62,7 @@ int initSock(){
 * @param notify
 * @return void
 */
-void *showBubbleNotify(void *notify){	
+void *showBubbleNotify(void *notify){
 	char command[200];
 	sprintf(command, "terminal-notifier -message \"%s\"", notify);
 	system(command);
@@ -73,7 +73,7 @@ void *showBubbleNotify(void *notify){
 * handle bind new socket to server
 * @param connect port, serverAddr
 * @return void
-*/ 
+*/
 void bindClient(int port, char *serverAddr){
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(port);
@@ -123,7 +123,7 @@ void handleRequestFile(Message recvMess) {
 		msg.type = TYPE_REQUEST_FILE;
 		long filelen;
 	    fseek(fptr, 0, SEEK_END);          // Jump to the end of the file
-	    filelen = ftell(fptr);             // Get the current byte offset in the file       
+	    filelen = ftell(fptr);             // Get the current byte offset in the file
 	    rewind(fptr);
 	    char len[100];
 	    sprintf(len, "%ld", filelen);
@@ -160,17 +160,17 @@ void uploadFile(Message recvMess) {
     else {
     	long filelen;
         fseek(fptr, 0, SEEK_END);          // Jump to the end of the file
-        filelen = ftell(fptr);             // Get the current byte offset in the file       
+        filelen = ftell(fptr);             // Get the current byte offset in the file
         rewind(fptr);    // pointer to start of file
     	int check = 1;
         int sumByte = 0;
     	while(!feof(fptr)) {
             int numberByteSend = PAYLOAD_SIZE;
             if((sumByte + PAYLOAD_SIZE) > filelen) {// if over file size
-                numberByteSend = filelen - sumByte; 
+                numberByteSend = filelen - sumByte;
             }
             char* buffer = (char *) malloc((numberByteSend) * sizeof(char));
-            fread(buffer, numberByteSend, 1, fptr); // read buffer with size 
+            fread(buffer, numberByteSend, 1, fptr); // read buffer with size
             memcpy(sendMsg.payload, buffer, numberByteSend);
             sendMsg.length = numberByteSend;
             sumByte += numberByteSend; //increase byte send
@@ -192,7 +192,7 @@ void uploadFile(Message recvMess) {
 
 /*
 * method of socket run on background
-* @param 
+* @param
 * @return void
 */
 void* backgroundHandle() {
@@ -205,7 +205,7 @@ void* backgroundHandle() {
 		}
 
 		switch(recvMess.type) {
-			case TYPE_REQUEST_FILE: 
+			case TYPE_REQUEST_FILE:
 				handleRequestFile(recvMess);
 				break;
 			case TYPE_REQUEST_DOWNLOAD:
@@ -220,7 +220,7 @@ void* backgroundHandle() {
 
 /*
 * handle ping server as new socket was init
-* @param 
+* @param
 * @return void
 */
 void pingServerToConfirmBackgroundThread() {
@@ -265,7 +265,7 @@ void backgroundHandleEnd(){
 * @return void
 */
 void printWatingMsg() {
-	printf("\n..................Please waiting................\n");
+	printf("\n.........................Please waiting.........................\n");
 }
 
 // get username and password from keyboard to login
@@ -306,7 +306,7 @@ void loginFunc(char *current_user){
 }
 
 /*
-* get register info 
+* get register info
 * @param user
 * @return void
 */
@@ -330,7 +330,6 @@ int getRegisterInfo(char *user){
 		printf("Confirm password invalid!\n");
 		return 0;
 	}
-	
 }
 
 /*
@@ -377,38 +376,38 @@ void logoutFunc(char *current_user){
 }
 
 /*
-* get show first menu of application 
-* @param 
+* get show first menu of application
+* @param
 * @return void
 */
 void menuAuthenticate() {
-	printf("\n=======================FileShareSystem===================\n");
+	printf("\n=======================FileShareSystem==================\n");
 	printf("\n\t\t\t* Login     - 1");
 	printf("\n\t\t\t* Register  - 2");
 	printf("\n\t\t\t* Exit      - 3");
-	printf("\n=========================================================\n");
+	printf("\n========================================================\n");
 	printf("\nPlease choose: ");
 }
 
 /*
-* get show main menu of application 
-* @param 
+* get show main menu of application
+* @param
 * @return void
 */
 void mainMenu() {
-	printf("\n=======================FileShareSystem===================\n");
+	printf("\n=======================FileShareSystem==================\n");
 	printf("\n\t\t\t1 Search File In Shared System ");
 	printf("\n\t\t\t2 View Your List Files ");
 	printf("\n\t\t\t3 Create new file ");
 	printf("\n\t\t\t4 User Manual ");
 	printf("\n\t\t\t5 Logout ");
-	printf("\n=========================================================");
+	printf("\n========================================================");
 	printf("\nPlease choose: ");
 }
 
 /*
 * get check type request of authenticate
-* @param 
+* @param
 * @return void
 */
 void authenticateFunc() {
@@ -422,17 +421,16 @@ void authenticateFunc() {
 		case '2':
 			registerFunc(current_user);
 			break;
-		case '3': 
+		case '3':
 			exit(0);
 		default:
 			printf("Syntax Error! Please choose again!\n");
 	}
-	
 }
 
 /*
 * show list file of user
-* @param 
+* @param
 * @return void
 */
 void showListFile() {
@@ -469,7 +467,7 @@ void removeFile(char* fileName) {
 
 /*
 * show list user who have file
-* @param 
+* @param
 * @return void
 */
 int showListSelectUser(char* listUser, char* username, char* fileName) {
@@ -479,8 +477,8 @@ int showListSelectUser(char* listUser, char* username, char* fileName) {
 	}
 	char** list = str_split(listUser, '\n');
 	int i;
-	printf("\n---------- List User ------------\n");
-	printf(" Username\t\t\tFile\t\t\tSize\n");
+	printf("\n--------------------------- List User -------------------------------\n");
+	printf("   Username\t\t\tFile\t\t\t\tSize\n");
 	for (i = 0; *(list + i); i++)
     {
     	char** tmp = str_split(*(list + i), ' ');
@@ -500,7 +498,6 @@ int showListSelectUser(char* listUser, char* username, char* fileName) {
 			printf("Please Select Valid Options!!\n");
 		}
 	}
-	
 	if(option == 0) {
 		return -1;
 	}
@@ -527,7 +524,7 @@ int download(char* fileName, char* path) {
 	} else{
 		sprintf(tmpFileName, "%s_%lu.%s", tmp[0], (unsigned long)time(NULL), tmp[1]);
 	}
-	
+
 	getFullPath(tmpFileName, fullPath);
 	strcpy(path, fullPath);
 	fptr = fopen(fullPath, "w+");
@@ -539,7 +536,7 @@ int download(char* fileName, char* path) {
         	return -1;
         }
         //printMess(recvMsg);
-        if(recvMsg.length > 0) { 
+        if(recvMsg.length > 0) {
             fwrite(recvMsg.payload, recvMsg.length, 1, fptr);
         } else {
             break;
@@ -562,7 +559,7 @@ void handleDownloadFile(char* selectedUser,char* fileName) {
 	sprintf(msg.payload, "%s\n%s", selectedUser, fileName);
 	msg.length = strlen(msg.payload);
 	sendMessage(client_sock, msg);
-	printf("......................Donwloading..........\n");
+	printf("......................Donwloading.....................\n");
 	char path[100];
 	if(download(fileName, path) == -1) {
 		showBubbleNotify("Error: Something Error When Downloading File!!");
@@ -570,14 +567,14 @@ void handleDownloadFile(char* selectedUser,char* fileName) {
 		return;
 	}
 	char message[100];
-	sprintf(message, "...Donwload Success.. File save in %s\n", path);
+	sprintf(message, "....................Donwload Success................... File save in %s\n", path);
 	showBubbleNotify(message);
-	printf("...Donwload Success.. File save in %s\n", path);
+	printf("....................Donwload Success................... File save in %s\n", path);
 }
 
 /*
-* search file method 
-* @param 
+* search file method
+* @param
 * @return void
 */
 void handleSearchFile() {
@@ -613,36 +610,16 @@ void handleSearchFile() {
 	printf(mess->payload);
 	if(showListSelectUser(mess->payload, selectedUser, fileName) == 1) {
 		handleDownloadFile(selectedUser, fileName);
-	}	
-}
-
-/*
-* how to use system manual
-* @param 
-* @return void
-*/
-void manual() {
-	printf("\n---- For search and download file from system press 1 and type file name\n");
-	printf("---- For view list file in your folder press 2\n");
-	
-	char choose;	
-	while(1) {
-		printf("Press Q/q for back to main menu: ");
-		scanf("%c", &choose);
-		while(getchar() != '\n');
-		if((choose == 'q') || (choose == 'Q')) break;
 	}
-	return;
 }
 
 /*
 * check type file request
-* @param 
+* @param
 * @return void
 */
 
-void createNewFile()
-{
+void createNewFile() {
 	char data[DATA_SIZE];
 	FILE * fPtr;
 	struct dirent *ent;
@@ -665,10 +642,28 @@ void createNewFile()
 	fgets(data, DATA_SIZE, stdin);
 	fputs(data, fPtr);
 	fclose(fPtr);
-	printf("File created and saved successfully. 🙂 \n");
+	printf("File created and saved successfully.\n");
 	return 0;
 }
 
+/*
+* how to use system manual
+* @param
+* @return void
+*/
+void manual() {
+	printf("\n---> For search and download file from system press 1 and type file name\n");
+	printf("---> For view list file in your folder press 2\n");
+
+	char choose;
+	while(1) {
+		printf("Press Q/q for back to main menu: ");
+		scanf("%c", &choose);
+		while(getchar() != '\n');
+		if((choose == 'q') || (choose == 'Q')) break;
+	}
+	return;
+}
 
 void requestFileFunc() {
 	mainMenu();
@@ -708,10 +703,6 @@ void communicateWithUser(){
 	}
 }
 
-void handle() {
-
-}
-
 /*
 * Main function
 * @param int argc, char** argv
@@ -720,7 +711,7 @@ void handle() {
 int main(int argc, char const *argv[])
 {
 
-	// check valid of IP and port number 
+	// check valid of IP and port number
 	if(argc!=3){
 		printf("Error!\nPlease enter two parameter as IPAddress and port number!\n");
 		exit(0);
@@ -748,11 +739,11 @@ int main(int argc, char const *argv[])
 	client_sock = initSock();
 	//Step 2: Specify server address
 	bindClient(port, serAddr);
-	
+
 	//Step 3: Request to connect server
 	connectToServer(SOCK);
 
-	//Step 4: Communicate with server			
+	//Step 4: Communicate with server
 	communicateWithUser();
 
 	close(client_sock);

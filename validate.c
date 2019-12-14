@@ -14,14 +14,25 @@
 #define NUMBEROFDOTSINIPV6 5 //number dots in ipv6
 char **tokens;
 
+// int isHasBlankSpace(char* str) {
+// 	int i = 0;
+// 	for(i = 0; i < strlen(str); i++) {
+// 		if(str[i] == ' ') {
+// 			return 1;
+// 		}
+// 	}
+// 	return 0;
+// }
+
 int isHasBlankSpace(char* str) {
-	int i = 0;
-	for(i = 0; i < strlen(str); i++) {
-		if(str[i] == ' ') {
-			return 1;
-		}
-	}
-	return 0;
+    int i = 0;
+    while(i < strlen(str)) {
+        if(str[i] == ' ') {
+            return 1;
+        }
+        i++;
+    }
+    return 0;
 }
 
 int inValidRange(int num, int min, int max) {

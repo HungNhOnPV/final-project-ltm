@@ -54,7 +54,7 @@ void prepend(User** head, User * newUser) {
 
 // get List User
 // readfile and create list users
-void getListUser(char* fileName); 
+void getListUser(char* fileName);
 
 // updateListUser
 void updateListUser(char* fileName);
@@ -66,12 +66,12 @@ User* searchUser(char *username) {
     	if(!strcmp(ptr->username, username)) break;
         ptr = ptr->next;
     }
-    
+
 	return ptr;
 }
 
 
-// compare password 
+// compare password
 int identifyPassWord(User* user, char* password){
 	return strcmp(user->password, password);
 }
@@ -102,7 +102,7 @@ int login(char* username, char* password){
 				return PASSWORD_INVALID;
 			}
 		}
-		else 
+		else
 			return USER_IS_BLOCKED;
 	}
 }
@@ -123,7 +123,7 @@ void updateFile() {
 	User *ptr = head;
 
     while (ptr != NULL) {
-        fprintf(fOut, "%s %s %d\n", ptr->username, ptr->password, ptr->status);    	
+        fprintf(fOut, "%s %s %d\n", ptr->username, ptr->password, ptr->status);
     	ptr = ptr->next;
     }
 

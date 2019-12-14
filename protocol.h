@@ -81,7 +81,7 @@ int sendMessage(int socket, Message msg);
 /*
 * recv message
 * @param int socket, Messgae msg
-* @return size of message if valid 
+* @return size of message if valid
 */
 int receiveMessage(int socket, Message *msg);
 

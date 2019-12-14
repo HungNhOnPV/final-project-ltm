@@ -48,12 +48,12 @@ int recvMsg(int socket, Message *msg){
     if (ret <= 0) return ret;
 
     //clone ret to message with idx position
-    memcpy(&(((char*)&recvMessage)[idx]), recvBuff, ret); 
-    
+    memcpy(&(((char*)&recvMessage)[idx]), recvBuff, ret);
+
     idx += ret;
-    // set number of bytes of message left 
+    // set number of bytes of message left
     nLeft -= ret;
-    
+
   }
 
   // copy message to msg
@@ -132,7 +132,7 @@ char** str_split(char* a_str, const char a_delim)
 }
 
 char* getHeaderOfPayload(char* payload) {
-  if(strlen(payload)) 
+  if(strlen(payload))
     return str_split(payload, '\n')[0];
   return NULL;
 }
