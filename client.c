@@ -590,7 +590,7 @@ void handleSearchFile() {
 	fptr = fopen(fullPath, "r");
 	if(fptr != NULL) {
 		while(1) {
-			printf("\nYou have a file with same name!\n -- Are you want to continue search? y/n: ");
+			printf("\nYou have a file with same name!\n ---> Are you want to continue search? y/n: ");
 			scanf("%c", &choose);
 			while(getchar() != '\n');
 			if((choose == 'y' || (choose == 'n'))) {
