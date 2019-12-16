@@ -65,7 +65,7 @@ int initSock(){
 void *showBubbleNotify(void *notify){
 	char command[200];
 	sprintf(command, "terminal-notifier -message \"%s\"", notify);
-	system(command);
+	// system(command);
 	return NULL;
 }
 
@@ -108,7 +108,6 @@ void getFullPath(char* fileName, char* fullPath) {
 * @return void
 */
 void handleRequestFile(Message recvMess) {
-	//printMess(recvMess);
 	Message msg;
 	msg.requestId = recvMess.requestId;
 	msg.length = 0;
@@ -477,7 +476,7 @@ int showListSelectUser(char* listUser, char* username, char* fileName) {
 	char** list = str_split(listUser, '\n');
 	int i;
 	printf("\n--------------------------- List User -------------------------------\n");
-	printf("   Username\t\t\tFile\t\t\t\tSize\n");
+	printf("Username\t\t\tFile\t\t\tSize\n");
 	for (i = 0; *(list + i); i++)
     {
     	char** tmp = str_split(*(list + i), ' ');
@@ -534,7 +533,6 @@ int download(char* fileName, char* path) {
         	removeFile(fullPath);
         	return -1;
         }
-        //printMess(recvMsg);
         if(recvMsg.length > 0) {
             fwrite(recvMsg.payload, recvMsg.length, 1, fptr);
         } else {
@@ -566,9 +564,9 @@ void handleDownloadFile(char* selectedUser,char* fileName) {
 		return;
 	}
 	char message[100];
-	sprintf(message, "....................Donwload Success................... File save in %s\n", path);
+	sprintf(message, "....................Donwload Success.................. File save in %s\n", path);
 	showBubbleNotify(message);
-	printf("....................Donwload Success................... File save in %s\n", path);
+	printf("....................Donwload Success.................. File save in %s\n", path);
 }
 
 /*
@@ -623,7 +621,6 @@ void createNewFile() {
 	FILE * fPtr;
 	struct dirent *ent;
 	char folderPath[100];
-	// sprintf(folderPath, "./%s", current_user); /*current_user : name_user*/
 	char file_name[100];
 	printf("Please enter the file name: ");
 	gets(file_name);
@@ -654,7 +651,6 @@ void requestFileFunc() {
 			handleSearchFile();
 			break;
 		case 2:
-			// searchFileFunc();
 			showListFile();
 			break;
 		case 3:
