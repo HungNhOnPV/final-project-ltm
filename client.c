@@ -271,10 +271,10 @@ void printWatingMsg() {
 void getLoginInfo(char *str){
 	char username[255];
 	char password[255];
-	printf("Enter username?: ");
+	printf("Enter username: ");
 	scanf("%[^\n]s", username);
 	while(getchar() != '\n');
-	printf("Enter password?: ");
+	printf("Enter password: ");
 	scanf("%[^\n]s", password);
 	while(getchar()!='\n');
 	sprintf(mess->payload, "LOGIN\nUSER %s\nPASS %s", username, password);
