@@ -382,9 +382,9 @@ void logoutFunc(char *current_user){
 */
 void menuAuthenticate() {
 	printf("\n=======================FileShareSystem==================\n");
-	printf("\n\t\t\t* Login     - 1");
-	printf("\n\t\t\t* Register  - 2");
-	printf("\n\t\t\t* Exit      - 3");
+	printf("\n\t\t\t1 Login");
+	printf("\n\t\t\t2 Register");
+	printf("\n\t\t\t3 Exit");
 	printf("\n========================================================\n");
 	printf("\nPlease choose: ");
 }
