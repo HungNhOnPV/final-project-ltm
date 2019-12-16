@@ -62,22 +62,6 @@ int numberElementsInArray(char** temp) {
     return i;
 }
 /*
-* Print List Online Client
-* @param
-* @return void
-*/
-void printListOnlineClient() {
-	int i = 0;
-	while(i < 1000) {
-		if(onlineClient[i].requestId > 0) {
-			printf("\n---ConnSock---: %d\n", onlineClient[i].connSock);
-			printf("---RequestId---: %d\n", onlineClient[i].requestId);
-			printf("---Username---: %s\n", onlineClient[i].username);
-		}
-		i++;
-	}
-}
-/*
 * find Avaiable Position in Array Client
 * @param
 * @return position i if valid else return -1
@@ -436,7 +420,6 @@ void* client_handler(void* conn_sock) {
 				break;
 			case TYPE_BACKGROUND:
 				addClientSocket(recvMess.requestId, connSock);
-				//printListOnlineClient();
 				return NULL;
 
 			case TYPE_REQUEST_FILE:

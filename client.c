@@ -399,8 +399,7 @@ void mainMenu() {
 	printf("\n\t\t\t1 Search File In Shared System ");
 	printf("\n\t\t\t2 View Your List Files ");
 	printf("\n\t\t\t3 Create new file ");
-	printf("\n\t\t\t4 User Manual ");
-	printf("\n\t\t\t5 Logout ");
+	printf("\n\t\t\t4 Logout ");
 	printf("\n========================================================");
 	printf("\nPlease choose: ");
 }
@@ -646,25 +645,6 @@ void createNewFile() {
 	return 0;
 }
 
-/*
-* how to use system manual
-* @param
-* @return void
-*/
-void manual() {
-	printf("\n---> For search and download file from system press 1 and type file name\n");
-	printf("---> For view list file in your folder press 2\n");
-
-	char choose;
-	while(1) {
-		printf("Press Q/q for back to main menu: ");
-		scanf("%c", &choose);
-		while(getchar() != '\n');
-		if((choose == 'q') || (choose == 'Q')) break;
-	}
-	return;
-}
-
 void requestFileFunc() {
 	mainMenu();
 	scanf("%d", &choose);
@@ -681,9 +661,6 @@ void requestFileFunc() {
 			createNewFile();
 			break;
 		case 4:
-			manual();
-			break;
-		case 5:
 			logoutFunc(current_user);
 			break;
 		default:
