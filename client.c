@@ -43,6 +43,36 @@ int numberElementsInArray(char** temp) {
     return i;
 }
 
+void createNewFile() {
+	char data[DATA_SIZE];
+	FILE * fPtr;
+	// struct dirent *ent;
+	// char folderPath[100];
+	char file_name[100];
+	printf("Please enter the file name: ");
+
+	// gets(file_name);///gets()"""
+	scanf("%s",file_name);
+	char current_user_path[100];
+	strcpy(current_user_path,current_user);
+	strcat(current_user_path,"/");
+	fPtr = fopen(strcat(current_user_path,file_name), "w");
+	if(fPtr == NULL)
+    {
+        printf("Unable to create file.\n");
+        exit(0);
+    }
+
+	printf("Enter contents to store in file : \n");
+	fgets(data, DATA_SIZE, stdin);
+	fputs(data, fPtr);
+	fclose(fPtr);
+	printf("File created and saved successfully.\n");
+	// return 0;
+}
+
+
+
 /*
 * init new socket - print error if have error
 * @param message, int connSock
@@ -64,7 +94,7 @@ int initSock(){
 */
 void *showBubbleNotify(void *notify){
 	char command[200];
-	sprintf(command, "terminal-notifier -message \"%s\"", notify);
+	sprintf(command, "terminal-notifier -message \"%p\"", notify);
 	// system(command);
 	return NULL;
 }
@@ -161,7 +191,7 @@ void uploadFile(Message recvMess) {
         fseek(fptr, 0, SEEK_END);          // Jump to the end of the file
         filelen = ftell(fptr);             // Get the current byte offset in the file
         rewind(fptr);    // pointer to start of file
-    	int check = 1;
+    	// int check = 1;
         int sumByte = 0;
     	while(!feof(fptr)) {
             int numberByteSend = PAYLOAD_SIZE;
@@ -176,7 +206,7 @@ void uploadFile(Message recvMess) {
             //printf("sumByte: %d\n", sumByte);
             if(sendMessage(under_client_sock, sendMsg) <= 0) {
                 printf("Connection closed!\n");
-                check = 0;
+                // check = 0;
                 break;
             }
             free(buffer);
@@ -410,7 +440,7 @@ void mainMenu() {
 */
 void authenticateFunc() {
 	menuAuthenticate();
-	scanf("%c", &choose);
+	scanf("%lc", &choose);
 	while(getchar() != '\n');
 	switch (choose){
 		case '1':
@@ -434,7 +464,7 @@ void authenticateFunc() {
 void showListFile() {
 	DIR *dir;
 	struct dirent *ent;
-	char folderPath[100];
+	char folderPath[1000];
 	sprintf(folderPath, "./%s", current_user);
 	if ((dir = opendir (folderPath)) != NULL) {
 	  /* print all the files and directories within directory */
@@ -557,13 +587,13 @@ void handleDownloadFile(char* selectedUser,char* fileName) {
 	msg.length = strlen(msg.payload);
 	sendMessage(client_sock, msg);
 	printf("......................Donwloading.....................\n");
-	char path[100];
+	char path[1000];
 	if(download(fileName, path) == -1) {
 		showBubbleNotify("Error: Something Error When Downloading File!!");
 		printf("Error: Something Error When Downloading File!!\n");
 		return;
 	}
-	char message[100];
+	char message[2000];
 	sprintf(message, "....................Donwload Success.................. File save in %s\n", path);
 	showBubbleNotify(message);
 	printf("....................Donwload Success.................. File save in %s\n", path);
@@ -604,7 +634,7 @@ void handleSearchFile() {
 	sendMessage(client_sock, *mess);
 	printWatingMsg();
 	receiveMessage(client_sock, mess);
-	printf(mess->payload);
+	printf("%s\n",mess->payload);
 	if(showListSelectUser(mess->payload, selectedUser, fileName) == 1) {
 		handleDownloadFile(selectedUser, fileName);
 	}
@@ -616,31 +646,7 @@ void handleSearchFile() {
 * @return void
 */
 
-void createNewFile() {
-	char data[DATA_SIZE];
-	FILE * fPtr;
-	struct dirent *ent;
-	char folderPath[100];
-	char file_name[100];
-	printf("Please enter the file name: ");
-	gets(file_name);
-	char current_user_path[100];
-	strcpy(current_user_path,current_user);
-	strcat(current_user_path,"/");
-	fPtr = fopen(strcat(current_user_path,file_name), "w");
-	if(fPtr == NULL)
-    {
-        printf("Unable to create file.\n");
-        exit(0);
-    }
 
-	printf("Enter contents to store in file : \n");
-	fgets(data, DATA_SIZE, stdin);
-	fputs(data, fPtr);
-	fclose(fPtr);
-	printf("File created and saved successfully.\n");
-	return 0;
-}
 
 void requestFileFunc() {
 	mainMenu();

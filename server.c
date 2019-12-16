@@ -268,7 +268,7 @@ char* searchFileInOnlineClients(char* fileName, int requestId, char* listUser) {
 	int i = 0;
 	Message msg, recvMsg;
 	msg.requestId = requestId;
-	char user[200];
+	char user[5000];
 	strcpy(msg.payload, fileName);
 	msg.length = strlen(msg.payload);
 	msg.type = TYPE_REQUEST_FILE;
@@ -379,15 +379,16 @@ void handleRequestDownload(Message recvMess, int connSock) {
 	char selectedUser[30];
 	char fileName[30];
 	//printMess(recvMess);
-	MessageType type = TYPE_ERROR;
+	// MessageType type = TYPE_ERROR;
 	if(numberElementsInArray(temp) == 2) {
 		strcpy(selectedUser, temp[0]);
 		strcpy(fileName, temp[1]);
 		addClientConnsock(recvMess.requestId, connSock);
 		__sendRequestDownload(recvMess.requestId, selectedUser, fileName, connSock);
-	} else {
-		type = TYPE_ERROR;
-	}
+	} 
+	// else {
+	// 	type = TYPE_ERROR;
+	// }
 
 }
 
