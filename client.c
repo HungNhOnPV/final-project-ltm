@@ -45,7 +45,7 @@ int numberElementsInArray(char** temp) {
 
 void createNewFile() {
 	char data[DATA_SIZE];
-	FILE * fPtr;
+	FILE * fptr;
 	// struct dirent *ent;
 	// char folderPath[100];
 	char file_name[100];
@@ -56,18 +56,23 @@ void createNewFile() {
 	char current_user_path[100];
 	strcpy(current_user_path,current_user);
 	strcat(current_user_path,"/");
-	fPtr = fopen(strcat(current_user_path,file_name), "w");
-	if(fPtr == NULL)
+	fptr = fopen(strcat(current_user_path,file_name), "w");
+	if(fptr == NULL)
     {
         printf("Unable to create file.\n");
         exit(0);
     }
 
 	printf("Enter contents to store in file : \n");
-	fgets(data, DATA_SIZE, stdin);
-	fputs(data, fPtr);
-	fclose(fPtr);
-	printf("File created and saved successfully.\n");
+	// fgets(data, DATA_SIZE, stdin);
+	// fputs(data, fPtr);
+	// fclose(fPtr);
+	// fgets(data, DATA_SIZE, stdin);
+	scanf("%s", data);
+    fprintf(fptr, "%s", data);
+    fclose(fptr);
+	printf("%s...",data);
+	printf("File saved successfully.\n");
 	// return 0;
 }
 
