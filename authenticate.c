@@ -16,19 +16,6 @@ User *createNewUser(char* username, char* password, int status) {
 	return newUser;
 }
 
-// print List users
-void printList() {
-    User *ptr = head;
-    while (ptr != NULL) {
-        printf("Username: %s\n", ptr->username);
-        printf("Status: %s\n", ((ptr->status == ACTIVE) ? "Active" : "Blocked"));
-        printf("isOnline: %s\n", ((ptr->isLogin == OFFLINE) ? "OFFLINE" : "ONLINE"));
-        printf("----------------------------------\n");
-
-        ptr = ptr->next;
-    }
-}
-
 // add user to end of list
 void append(User* newUser) {
 	if(head == NULL) {
