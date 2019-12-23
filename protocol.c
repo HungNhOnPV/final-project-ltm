@@ -81,7 +81,7 @@ int receiveMessage(int conn_sock, Message *msg) {
   return 1;
 }
 
-char** str_split(char* a_str, const char a_delim)
+char** str_split(char* a_str, const char a_delim) // chia thanh str thanh mang
 {
     char** result    = 0;
     size_t count     = 0;

@@ -129,7 +129,7 @@ void increaseRequestId() {
 * @param message, int connSock
 * @return void
 */
-void handleLogin(Message mess, int connSock) {
+void handleLogin(Message mess, int connSock) { // login
 	char** temp = str_split(mess.payload, '\n'); // handle payload, divide payload to array string split by '\n'
 	StatusCode loginCode;
 	//User* curUser = NULL;
@@ -181,7 +181,7 @@ void handleLogin(Message mess, int connSock) {
 * @param message, int connSock
 * @return void
 */
-void handleRegister(Message mess, int connSock){
+void handleRegister(Message mess, int connSock) { // register
 	char** temp = str_split(mess.payload, '\n');
 	StatusCode registerCode;
 	if(numberElementsInArray(temp) == 3) {
@@ -228,7 +228,7 @@ void handleRegister(Message mess, int connSock){
 	sendWithCode(mess, registerCode, connSock);
 }
 
-void handleLogout(Message mess, int connSock){
+void handleLogout(Message mess, int connSock) { // logout
 	char** temp = str_split(mess.payload, '\n');
 	StatusCode logoutCode;
 	if(numberElementsInArray(temp) != 2) {
@@ -249,7 +249,7 @@ void handleLogout(Message mess, int connSock){
 	sendWithCode(mess, logoutCode, connSock);
 }
 
-void handleAuthenticateRequest(Message mess, int connSock) {
+void handleAuthenticateRequest(Message mess, int connSock) { // check login or register or logout
 	char* payloadHeader;
 	char temp[PAYLOAD_SIZE];
 	strcpy(temp, mess.payload);
