@@ -17,7 +17,7 @@ int main(int argc, char const *argv[])
 	int port = atoi(argv[2]);
 	mess = (Message*) malloc (sizeof(Message));
 	mess->requestId = 0;
- 	if(!validPortNumber(port)) {
+ 	if(port<0 && port>65535) {
  		perror("Invalid Port Number!\n");
  		exit(0);
  	}
@@ -32,13 +32,20 @@ int main(int argc, char const *argv[])
 	}
 
 	//Step 1: Construct socket
-	client_sock = initSock();
+	int newsock = socket(AF_INET, SOCK_STREAM, 0);
+    	if (newsock == -1 ){
+    		perror("\nError: ");
+    		exit(0);
+    	}
+	client_sock = newsock;
 	//Step 2: Specify server address
 	bindClient(port, serAddr);
 
 	//Step 3: Request to connect server
-	connectToServer(SOCK);
-
+    if(connect(client_sock, (struct sockaddr*) (&server_addr), sizeof(struct sockaddr)) < 0){
+			printf("\nError!Can not connect to sever! Client exit imediately!\n");
+			exit(0);
+		}
 	//Step 4: Communicate with server
 	communicateWithUser();
 

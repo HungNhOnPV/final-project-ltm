@@ -17,7 +17,7 @@ int main(int argc, char **argv)
  		perror(" Please input port number\n");
  		exit(0);
  	}
- 	if(!validPortNumber(port_number)) {
+ 	if(port_number<0 && port_number >65535) {
  		perror("Invalid Port Number!\n");
  		exit(0);
  	}
@@ -42,9 +42,31 @@ int main(int argc, char **argv)
 		return 0;
 	}
 	printf("Server start...\n");
-	initArrayClient();
-	readFile();
-	//printList();
+	int i = 0;
+    	while(i < 1000) {
+    		onlineClient[i].requestId = 0;    //set default value 0 for requestId
+    		onlineClient[i].uploadSuccess = 0; //set default value 0 for uploadSuccess
+    		i++;
+    	}
+	char username[254];
+    	char password[32];
+    	int status;
+    	char c;
+    	FILE* fIn;
+    	fIn = fopen(ACCOUNT_FILE, "r");
+    	if(!fIn) {
+    		printf("File not exist??\n");
+    		printf("End Program : File %s not existed\n", ACCOUNT_FILE);
+            exit(0);
+    	}
+
+    	while(!feof(fIn)) {
+    		if(fscanf(fIn, "%s %s %d%c", username, password, &status, &c) != EOF) {
+    			append(createNewUser(username, password, status));
+    		}
+    		if(feof(fIn)) break;
+    	}
+    	fclose(fIn);
 	//Step 4: Communicate with client
 	while(1) {
 		//accept request

@@ -27,27 +27,7 @@ pthread_mutex_t lock;
 int requestId = 1;
 
 Client onlineClient[1000];
-/*
-* Init Array Client
-* Set default value for Online Client
-* @param
-* @return void
-*/
-// void initArrayClient() {
-// 	int i;
-// 	for(i = 0; i < 1000; i++) {
-// 		onlineClient[i].requestId = 0;    //set default value 0 for requestId
-// 		onlineClient[i].uploadSuccess = 0; //set default value 0 for uploadSuccess
-// 	}
-// }
-void initArrayClient() {
-	int i = 0;
-	while(i < 1000) {
-		onlineClient[i].requestId = 0;    //set default value 0 for requestId
-		onlineClient[i].uploadSuccess = 0; //set default value 0 for uploadSuccess
-		i++;
-	}
-}
+
 /*
 * count number element in array with unknown size
 * @param temp[][]
@@ -61,33 +41,18 @@ int numberElementsInArray(char** temp) {
     }
     return i;
 }
-/*
-* find Avaiable Position in Array Client
-* @param
-* @return position i if valid else return -1
-*/
-int findAvaiableElementInArrayClient() {
-	int i = 0;
-	while (i < 1000) {
-		if(onlineClient[i].requestId == 0) {	// avaiable position is position where requestId = 0
-			return i;
-		}
-		i++;
-	}
-	return -1; // if not have avaiable element
-}
+
 /*
 * find client with request id
 * @param requestId
 * @return position has request id if not return -1
 */
 int findClient(int requestId) {
-	int i = 0;
-	while (i < 1000) {
+
+	for (int i = 0;i < 1000;i++) {
 		if(onlineClient[i].requestId == requestId) {
 			return i;
 		}
-		i++;
 	}
 	return -1;
 }
@@ -119,150 +84,6 @@ void setClient(int i, int requestId, char* username) {
 		printf("Full Client, Service not avaiable!!\n"); //If array client full
 	}
 }
-void increaseRequestId() {
-	pthread_mutex_lock(&lock); //use mutex for increase shared data requestId
-	requestId++;
-	pthread_mutex_unlock(&lock);
-}
-/*
-* handle login function
-* @param message, int connSock
-* @return void
-*/
-void handleLogin(Message mess, int connSock) { // login
-	char** temp = str_split(mess.payload, '\n'); // handle payload, divide payload to array string split by '\n'
-	StatusCode loginCode;
-	//User* curUser = NULL;
-	if(numberElementsInArray(temp) == 3) {
-		char** userStr = str_split(temp[1], ' '); // get username
-		char** passStr = str_split(temp[2], ' '); // get password
-		if((numberElementsInArray(userStr) == 2) && (numberElementsInArray(passStr) == 2)) { //check payload structure valid with two parameters
-			if(!(strcmp(userStr[0], COMMAND_USER) || strcmp(passStr[0], COMMAND_PASSWORD))) { //check payload structure valid with two parameters
-				char username[30];
-				char password[20];
-				strcpy(username, userStr[1]);
-				strcpy(password, passStr[1]);
-				if(validateUsername(username) || validatePassword(password)) { // check username and password are valid
-					loginCode = login(username, password); // login with username and password
-					if(loginCode != LOGIN_SUCCESS)
-						mess.type = TYPE_ERROR;
-					else{
-						if(mess.requestId == 0) {
-							mess.requestId = requestId;
-							increaseRequestId();
-							int i = findAvaiableElementInArrayClient();
-							setClient(i, mess.requestId, username); // when user login success set user to online client
-						}
-					}
-				} else {
-					mess.type = TYPE_ERROR;
-					loginCode = USERNAME_OR_PASSWORD_INVALID; //set login code
-				}
-			}
-			else{
-				loginCode = COMMAND_INVALID;
-				mess.type=TYPE_ERROR;
-			}
-		}
-		else{
-			loginCode = COMMAND_INVALID;
-			mess.type=TYPE_ERROR;
-		}
-	}
-	else {
-		mess.type=TYPE_ERROR;
-		loginCode = COMMAND_INVALID;
-		printf("Fails on handle Login!!");
-	}
-	sendWithCode(mess, loginCode, connSock);
-}
-/*
-* handle register function
-* @param message, int connSock
-* @return void
-*/
-void handleRegister(Message mess, int connSock) { // register
-	char** temp = str_split(mess.payload, '\n');
-	StatusCode registerCode;
-	if(numberElementsInArray(temp) == 3) {
-		char** userStr = str_split(temp[1], ' ');
-		char** passStr = str_split(temp[2], ' ');
-		if((numberElementsInArray(userStr) == 2) && (numberElementsInArray(passStr) == 2)) {
-			if(!(strcmp(userStr[0], COMMAND_USER) || strcmp(passStr[0], COMMAND_PASSWORD))) {
-				char username[30];
-				char password[20];
-				strcpy(username, userStr[1]);
-				strcpy(password, passStr[1]);
-				if(validateUsername(username) || validatePassword(password)) {
-					registerCode = registerUser(username, password);
-					if(registerCode != REGISTER_SUCCESS)
-						mess.type=TYPE_ERROR;
-					else {
-						if(mess.requestId == 0) {
-							mess.requestId = requestId;
-							increaseRequestId();
-							int i = findAvaiableElementInArrayClient();
-							setClient(i, mess.requestId, username);
-						}
-					}
-				} else {
-					mess.type = TYPE_ERROR;
-					registerCode = USERNAME_OR_PASSWORD_INVALID;
-				}
-			}
-			else{
-				registerCode = COMMAND_INVALID;
-				mess.type=TYPE_ERROR;
-			}
-		}
-		else{
-			registerCode = COMMAND_INVALID;
-			mess.type=TYPE_ERROR;
-		}
-	}
-	else {
-		mess.type=TYPE_ERROR;
-		registerCode = COMMAND_INVALID;
-		printf("Fails on handle Register!!");
-	}
-	sendWithCode(mess, registerCode, connSock);
-}
-
-void handleLogout(Message mess, int connSock) { // logout
-	char** temp = str_split(mess.payload, '\n');
-	StatusCode logoutCode;
-	if(numberElementsInArray(temp) != 2) {
-		mess.type = TYPE_ERROR;
-		logoutCode = COMMAND_INVALID;
-		printf("Fails on handle logout!!");
-	}
-	else{
-		logoutCode = logoutUser(temp[1]);
-		if(logoutCode == LOGOUT_SUCCESS) {
-			int i = findClient(mess.requestId);
-			if(i >= 0) {
-				onlineClient[i].requestId = 0;
-				onlineClient[i].username[0] = '\0';
-			}
-		}
-	}
-	sendWithCode(mess, logoutCode, connSock);
-}
-
-void handleAuthenticateRequest(Message mess, int connSock) { // check login or register or logout
-	char* payloadHeader;
-	char temp[PAYLOAD_SIZE];
-	strcpy(temp, mess.payload);
-	payloadHeader = getHeaderOfPayload(temp);
-	if(!strcmp(payloadHeader, LOGIN_CODE)) {
-		handleLogin(mess, connSock);
-	} else if (!strcmp(payloadHeader, REGISTER_CODE)) {
-		handleRegister(mess, connSock);
-
-	} else if(!strcmp(payloadHeader, LOGOUT_CODE)) {
-		handleLogout(mess, connSock);
-	}
-}
 
 char* searchFileInOnlineClients(char* fileName, int requestId, char* listUser) {
 	int i = 0;
@@ -288,31 +109,6 @@ char* searchFileInOnlineClients(char* fileName, int requestId, char* listUser) {
 		listUser[strlen(listUser) - 1] = '\0';
 	}
 	return listUser;
-}
-
-void handleRequestFile(Message recvMess, int connSock) {
-	//printMess(recvMess);
-	char fileName[100];
-	char listUser[2000] = "";
-	strcpy(fileName, recvMess.payload);
-	int requestId = recvMess.requestId;
-	searchFileInOnlineClients(fileName, requestId, listUser);
-	//printf("List: %s\n", listUser);
-	Message msg;
-	msg.requestId = recvMess.requestId;
-	msg.type = TYPE_REQUEST_FILE;
-	strcpy(msg.payload, listUser);
-	msg.length = strlen(msg.payload);
-	sendMessage(connSock, msg);
-}
-
-void addClientSocket(int id, int connSock) {
-	int i = findClient(id);
-	pthread_mutex_lock(&lock);
-	if(i >= 0) {
-		onlineClient[i].connSock = connSock;
-	}
-	pthread_mutex_unlock(&lock);
 }
 
 void removeFile(char* fileName) {
@@ -365,33 +161,6 @@ int __sendRequestDownload(int requestId, char* selectedUser, char* fileName, int
 	return 1;
 }
 
-void addClientConnsock(int id, int connSock) {
-	int i = findClient(id);
-	pthread_mutex_lock(&lock);
-	if(i >= 0) {
-		onlineClient[i].clientSock = connSock;
-	}
-	pthread_mutex_unlock(&lock);
-}
-
-void handleRequestDownload(Message recvMess, int connSock) {
-	char** temp = str_split(recvMess.payload, '\n');
-	char selectedUser[30];
-	char fileName[30];
-	//printMess(recvMess);
-	// MessageType type = TYPE_ERROR;
-	if(numberElementsInArray(temp) == 2) {
-		strcpy(selectedUser, temp[0]);
-		strcpy(fileName, temp[1]);
-		addClientConnsock(recvMess.requestId, connSock);
-		__sendRequestDownload(recvMess.requestId, selectedUser, fileName, connSock);
-	} 
-	// else {
-	// 	type = TYPE_ERROR;
-	// }
-
-}
-
 /*
 * Handler Request from Client
 * @param char* message, int key
@@ -417,17 +186,184 @@ void* client_handler(void* conn_sock) {
 		//blocking
 		switch(recvMess.type) {
 			case TYPE_AUTHENTICATE:
-				handleAuthenticateRequest(recvMess, connSock);
+				{
+				char* payloadHeader;
+                	char temp[PAYLOAD_SIZE];
+                	strcpy(temp, recvMess.payload);
+                	payloadHeader = getHeaderOfPayload(temp);
+                	if(!strcmp(payloadHeader, LOGIN_CODE)) {
+                			char** temp = str_split(recvMess.payload, '\n'); // handle payload, divide payload to array string split by '\n'
+                        	StatusCode loginCode;
+                        	//User* curUser = NULL;
+                        	if(numberElementsInArray(temp) == 3) {
+                        		char** userStr = str_split(temp[1], ' '); // get username
+                        		char** passStr = str_split(temp[2], ' '); // get password
+                        		if((numberElementsInArray(userStr) == 2) && (numberElementsInArray(passStr) == 2)) { //check payload structure valid with two parameters
+                        			if(!(strcmp(userStr[0], COMMAND_USER) || strcmp(passStr[0], COMMAND_PASSWORD))) { //check payload structure valid with two parameters
+                        				char username[30];
+                        				char password[20];
+                        				strcpy(username, userStr[1]);
+                        				strcpy(password, passStr[1]);
+                        				if(validateUsername(username) || validatePassword(password)) { // check username and password are valid
+                        					loginCode = login(username, password); // login with username and password
+                        					if(loginCode != LOGIN_SUCCESS)
+                        						recvMess.type = TYPE_ERROR;
+                        					else{
+                        						if(recvMess.requestId == 0) {
+                        							recvMess.requestId = requestId;
+                        							pthread_mutex_lock(&lock); //use mutex for increase shared data requestId
+                                                    	requestId++;
+                                                    	pthread_mutex_unlock(&lock);
+                                                     int i = 0;
+                                                       	while (i < 1000) {
+                                                        if(onlineClient[i].requestId == 0) {	// avaiable position is position where requestId = 0
+                                                           	setClient(i, recvMess.requestId, username);
+                                                           		}
+                                                           		i++;
+                                                           	}
+                        							// when user login success set user to online client
+                        						}
+                        					}
+                        				} else {
+                        					recvMess.type = TYPE_ERROR;
+                        					loginCode = USERNAME_OR_PASSWORD_INVALID; //set login code
+                        				}
+                        			}
+                        			else{
+                        				loginCode = COMMAND_INVALID;
+                        				recvMess.type=TYPE_ERROR;
+                        			}
+                        		}
+                        		else{
+                        			loginCode = COMMAND_INVALID;
+                        			recvMess.type=TYPE_ERROR;
+                        		}
+                        	}
+                        	else {
+                        		recvMess.type=TYPE_ERROR;
+                        		loginCode = COMMAND_INVALID;
+                        		printf("Fails on handle Login!!");
+                        	}
+                        	sendWithCode(recvMess, loginCode, connSock);
+                	} else if (!strcmp(payloadHeader, REGISTER_CODE)) {
+                			char** temp = str_split(recvMess.payload, '\n');
+                        	StatusCode registerCode;
+                        	if(numberElementsInArray(temp) == 3) {
+                        		char** userStr = str_split(temp[1], ' ');
+                        		char** passStr = str_split(temp[2], ' ');
+                        		if((numberElementsInArray(userStr) == 2) && (numberElementsInArray(passStr) == 2)) {
+                        			if(!(strcmp(userStr[0], COMMAND_USER) || strcmp(passStr[0], COMMAND_PASSWORD))) {
+                        				char username[30];
+                        				char password[20];
+                        				strcpy(username, userStr[1]);
+                        				strcpy(password, passStr[1]);
+                        				if(validateUsername(username) || validatePassword(password)) {
+                        					registerCode = registerUser(username, password);
+                        					if(registerCode != REGISTER_SUCCESS)
+                        						recvMess.type=TYPE_ERROR;
+                        					else {
+                        						if(recvMess.requestId == 0) {
+                        							recvMess.requestId = requestId;
+                        							pthread_mutex_lock(&lock); //use mutex for increase shared data requestId
+                                                    requestId++;
+                                                    pthread_mutex_unlock(&lock);
+                        							int i = 0;
+                                                     	while (i < 1000) {
+                                                            if(onlineClient[i].requestId == 0) {	// avaiable position is position where requestId = 0
+                                                         setClient(i, recvMess.requestId, username);
+                                                         	}
+                                                            i++;
+                                                          	}
+
+                        						}
+                        					}
+                        				} else {
+                        					recvMess.type = TYPE_ERROR;
+                        					registerCode = USERNAME_OR_PASSWORD_INVALID;
+                        				}
+                        			}
+                        			else{
+                        				registerCode = COMMAND_INVALID;
+                        				recvMess.type=TYPE_ERROR;
+                        			}
+                        		}
+                        		else{
+                        			registerCode = COMMAND_INVALID;
+                        			recvMess.type=TYPE_ERROR;
+                        		}
+                        	}
+                        	else {
+                        		recvMess.type=TYPE_ERROR;
+                        		registerCode = COMMAND_INVALID;
+                        		printf("Fails on handle Register!!");
+                        	}
+                        	sendWithCode(recvMess, registerCode, connSock);
+
+                	} else if(!strcmp(payloadHeader, LOGOUT_CODE)) {
+                	char** temp = str_split(recvMess.payload, '\n');
+                    	StatusCode logoutCode;
+                    	if(numberElementsInArray(temp) != 2) {
+                    		recvMess.type = TYPE_ERROR;
+                    		logoutCode = COMMAND_INVALID;
+                    		printf("Fails on handle logout!!");
+                    	}
+                    	else{
+                    		logoutCode = logoutUser(temp[1]);
+                    		if(logoutCode == LOGOUT_SUCCESS) {
+                    			int i = findClient(recvMess.requestId);
+                    			if(i >= 0) {
+                    				onlineClient[i].requestId = 0;
+                    				onlineClient[i].username[0] = '\0';
+                    			}
+                    		}
+                    	}
+                    	sendWithCode(recvMess, logoutCode, connSock);
+                	}
+				}
 				break;
 			case TYPE_BACKGROUND:
-				addClientSocket(recvMess.requestId, connSock);
+               {
+				int i = findClient(recvMess.requestId);
+                	pthread_mutex_lock(&lock);
+                	if(i >= 0) {
+                		onlineClient[i].connSock = connSock;
+                	}
+                	pthread_mutex_unlock(&lock);
 				return NULL;
-
+            }
 			case TYPE_REQUEST_FILE:
-				handleRequestFile(recvMess, connSock);
+				{
+				char fileName[100];
+                 	char listUser[2000] = "";
+                 	strcpy(fileName, recvMess.payload);
+                 	int requestId = recvMess.requestId;
+                 	searchFileInOnlineClients(fileName, requestId, listUser);
+                 	//printf("List: %s\n", listUser);
+                 	Message msg;
+                 	msg.requestId = recvMess.requestId;
+                 	msg.type = TYPE_REQUEST_FILE;
+                 	strcpy(msg.payload, listUser);
+                 	msg.length = strlen(msg.payload);
+                 	sendMessage(connSock, msg);
+                 	}
 				break;
 			case TYPE_REQUEST_DOWNLOAD:
-				handleRequestDownload(recvMess, connSock);
+				 {
+                	char** temp = str_split(recvMess.payload, '\n');
+                	char selectedUser[30];
+                	char fileName[30];
+                	if(numberElementsInArray(temp) == 2) {
+                		strcpy(selectedUser, temp[0]);
+                		strcpy(fileName, temp[1]);
+                		int i = findClient(recvMess.requestId);
+                        	pthread_mutex_lock(&lock);
+                        	if(i >= 0) {
+                        		onlineClient[i].clientSock = connSock;
+                        	}
+                        	pthread_mutex_unlock(&lock);
+                		__sendRequestDownload(recvMess.requestId, selectedUser, fileName, connSock);
+                	}
+                }
 				break;
 			case TYPE_UPLOAD_FILE:
 				break;

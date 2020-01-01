@@ -93,18 +93,14 @@ int login(char* username, char* password){
 			return USER_IS_BLOCKED;
 	}
 }
-// exit program
-void exitProgram() {
-	printf("End Program : File %s not existed\n", ACCOUNT_FILE);
-	exit(0);
-}
 
 void updateFile() {
 	FILE* fOut;
 	fOut = fopen(ACCOUNT_FILE, "w");
 	if(!fOut) {
 		printf("File not exist??\n");
-		exitProgram();
+		printf("End Program : File %s not existed\n", ACCOUNT_FILE);
+        exit(0);
 	}
 
 	User *ptr = head;
@@ -127,7 +123,8 @@ void readFile() {
 	fIn = fopen(ACCOUNT_FILE, "r");
 	if(!fIn) {
 		printf("File not exist??\n");
-		exitProgram();
+		printf("End Program : File %s not existed\n", ACCOUNT_FILE);
+        exit(0);
 	}
 
 	while(!feof(fIn)) {

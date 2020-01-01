@@ -35,12 +35,9 @@ int isHasBlankSpace(char* str) {
     return 0;
 }
 
-int inValidRange(int num, int min, int max) {
-	return (num >= min) && (num <= max);
-}
 int validateUsername(char* username) {
 	int length = strlen(username);
-	if(inValidRange(length, MIN_LENGTH_OF_USERNAME, MAX_LENGTH_OF_USERNAME) && !isHasBlankSpace(username)) {
+	if((length >= MIN_LENGTH_OF_USERNAME) && (length <= MAX_LENGTH_OF_USERNAME ) && !isHasBlankSpace(username)) {
 		return 1;
 	}
 	return 0;
@@ -48,7 +45,7 @@ int validateUsername(char* username) {
 
 int validatePassword(char* password) {
 	int length = strlen(password);
-	if(inValidRange(length, MIN_LENGTH_OF_PASSWORD, MAX_LENGTH_OF_PASSWORD) && !isHasBlankSpace(password)) {
+	if((length >= MIN_LENGTH_OF_USERNAME) && (length <= MAX_LENGTH_OF_USERNAME ) && !isHasBlankSpace(password)) {
 		return 1;
 	}
 	return 0;
@@ -158,15 +155,6 @@ int checkIP(char *str)
     }
     return 0;
 }
-/*
-* Check valid port number
-* @param int port
-* @return 1 if valid port number, else return 0
-*/
-int validPortNumber(int port) {
-	return (port > 0) && (port <= 65535);
-}
-
 /*
 * Check valid Ip
 * @param char* ip

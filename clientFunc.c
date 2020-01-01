@@ -36,63 +36,13 @@ char fileRepository[100];
 * @return number param
 */
 int numberElementsInArray(char** temp) {
-	int i;
-	for (i = 0; *(temp + i); i++)
-    {
-        // count number elements in array
-    }
-    return i;
-}
-
-void createNewFile() {
-	char data[DATA_SIZE];
-	FILE * fptr;
-	// struct dirent *ent;
-	// char folderPath[100];
-	char file_name[100];
-	printf("Please enter the file name: ");
-
-	// gets(file_name);///gets()"""
-	scanf("%s",file_name);
-	char current_user_path[100];
-	strcpy(current_user_path,current_user);
-	strcat(current_user_path,"/");
-	fptr = fopen(strcat(current_user_path,file_name), "w");
-	if(fptr == NULL)
-    {
-        printf("Unable to create file.\n");
-        exit(0);
-    }
-
-	printf("Enter contents to store in file : \n");
-	// fgets(data, DATA_SIZE, stdin);
-	// fputs(data, fPtr);
-	// fclose(fPtr);
-	// fgets(data, DATA_SIZE, stdin);
-	scanf("%s", data);
-    fprintf(fptr, "%s", data);
-    fclose(fptr);
-	printf("%s...",data);
-	printf("File saved successfully.\n");
-	// return 0;
-}
-
-
-
-/*
-* init new socket - print error if have error
-* @param message, int connSock
-* @return new socket
-*/
-int initSock(){
-	int newsock = socket(AF_INET, SOCK_STREAM, 0);
-	if (newsock == -1 ){
-		perror("\nError: ");
-		exit(0);
+	int i = 0;
+	while (*(temp + i) != NULL)
+	{
+		i++;
 	}
-	return newsock;
+	return i;
 }
-
 /*
 * handle show notify
 * @param notify
@@ -139,93 +89,6 @@ void getFullPath(char* fileName, char* fullPath) {
 }
 
 /*
-* handle get file as request
-* @param message
-* @return void
-*/
-void handleRequestFile(Message recvMess) {
-	Message msg;
-	msg.requestId = recvMess.requestId;
-	msg.length = 0;
-	char fileName[50];
-	strcpy(fileName, recvMess.payload);
-	char fullPath[100];
-	getFullPath(fileName, fullPath);
-	FILE *fptr;
-	fptr = fopen(fullPath, "r");
-
-	if(fptr != NULL) {
-		msg.type = TYPE_REQUEST_FILE;
-		long filelen;
-	    fseek(fptr, 0, SEEK_END);          // Jump to the end of the file
-	    filelen = ftell(fptr);             // Get the current byte offset in the file
-	    rewind(fptr);
-	    char len[100];
-	    sprintf(len, "%ld", filelen);
-	    strcpy(msg.payload, len);
-	    msg.length = strlen(msg.payload);
-	    fclose(fptr);
-	} else {
-		msg.type = TYPE_ERROR;
-	}
-	sendMessage(under_client_sock, msg);
-}
-
-/*
-* handle upload file to server
-* @param message
-* @return void
-*/
-void uploadFile(Message recvMess) {
-	char fileName[30];
-	char fullPath[100];
-	strcpy(fileName, recvMess.payload);
-	getFullPath(fileName, fullPath);
-	Message msg, sendMsg;
-	sendMsg.requestId = recvMess.requestId;
-	FILE* fptr;
-	if ((fptr = fopen(fullPath, "rb+")) == NULL){
-        //printf("Error: File not found\n");
-        fclose(fptr);
-        msg.type = TYPE_ERROR;
-        msg.requestId = recvMess.requestId;
-        msg.length = 0;
-        sendMessage(under_client_sock, msg);
-    }
-    else {
-    	long filelen;
-        fseek(fptr, 0, SEEK_END);          // Jump to the end of the file
-        filelen = ftell(fptr);             // Get the current byte offset in the file
-        rewind(fptr);    // pointer to start of file
-    	// int check = 1;
-        int sumByte = 0;
-    	while(!feof(fptr)) {
-            int numberByteSend = PAYLOAD_SIZE;
-            if((sumByte + PAYLOAD_SIZE) > filelen) {// if over file size
-                numberByteSend = filelen - sumByte;
-            }
-            char* buffer = (char *) malloc((numberByteSend) * sizeof(char));
-            fread(buffer, numberByteSend, 1, fptr); // read buffer with size
-            memcpy(sendMsg.payload, buffer, numberByteSend);
-            sendMsg.length = numberByteSend;
-            sumByte += numberByteSend; //increase byte send
-            //printf("sumByte: %d\n", sumByte);
-            if(sendMessage(under_client_sock, sendMsg) <= 0) {
-                printf("Connection closed!\n");
-                // check = 0;
-                break;
-            }
-            free(buffer);
-            if(sumByte >= filelen) {
-                break;
-            }
-        }
-        sendMsg.length = 0;
-        sendMessage(under_client_sock, sendMsg);
-    }
-}
-
-/*
 * method of socket run on background
 * @param
 * @return void
@@ -241,66 +104,88 @@ void* backgroundHandle() {
 
 		switch(recvMess.type) {
 			case TYPE_REQUEST_FILE:
-				handleRequestFile(recvMess);
+			{
+				Message msg;
+                	msg.requestId = recvMess.requestId;
+                	msg.length = 0;
+                	char fileName[50];
+                	strcpy(fileName, recvMess.payload);
+                	char fullPath[100];
+                	getFullPath(fileName, fullPath);
+                	FILE *fptr;
+                	fptr = fopen(fullPath, "r");
+
+                	if(fptr != NULL) {
+                		msg.type = TYPE_REQUEST_FILE;
+                		long filelen;
+                	    fseek(fptr, 0, SEEK_END);          // Jump to the end of the file
+                	    filelen = ftell(fptr);             // Get the current byte offset in the file
+                	    rewind(fptr);
+                	    char len[100];
+                	    sprintf(len, "%ld", filelen);
+                	    strcpy(msg.payload, len);
+                	    msg.length = strlen(msg.payload);
+                	    fclose(fptr);
+                	} else {
+                		msg.type = TYPE_ERROR;
+                	}
+                	sendMessage(under_client_sock, msg);
+                	}
 				break;
 			case TYPE_REQUEST_DOWNLOAD:
-				//printf("download under sock\n");
-				uploadFile(recvMess);
+				{
+					char fileName[30];
+                	char fullPath[100];
+                	strcpy(fileName, recvMess.payload);
+                	getFullPath(fileName, fullPath);
+                	Message msg, sendMsg;
+                	sendMsg.requestId = recvMess.requestId;
+                	FILE* fptr;
+                	if ((fptr = fopen(fullPath, "rb+")) == NULL){
+                        //printf("Error: File not found\n");
+                        fclose(fptr);
+                        msg.type = TYPE_ERROR;
+                        msg.requestId = recvMess.requestId;
+                        msg.length = 0;
+                        sendMessage(under_client_sock, msg);
+                    }
+                    else {
+                    	long filelen;
+                        fseek(fptr, 0, SEEK_END);          // Jump to the end of the file
+                        filelen = ftell(fptr);             // Get the current byte offset in the file
+                        rewind(fptr);    // pointer to start of file
+                    	// int check = 1;
+                        int sumByte = 0;
+                    	while(!feof(fptr)) {
+                            int numberByteSend = PAYLOAD_SIZE;
+                            if((sumByte + PAYLOAD_SIZE) > filelen) {// if over file size
+                                numberByteSend = filelen - sumByte;
+                            }
+                            char* buffer = (char *) malloc((numberByteSend) * sizeof(char));
+                            fread(buffer, numberByteSend, 1, fptr); // read buffer with size
+                            memcpy(sendMsg.payload, buffer, numberByteSend);
+                            sendMsg.length = numberByteSend;
+                            sumByte += numberByteSend; //increase byte send
+                            //printf("sumByte: %d\n", sumByte);
+                            if(sendMessage(under_client_sock, sendMsg) <= 0) {
+                                printf("Connection closed!\n");
+                                // check = 0;
+                                break;
+                            }
+                            free(buffer);
+                            if(sumByte >= filelen) {
+                                break;
+                            }
+                        }
+                        sendMsg.length = 0;
+                        sendMessage(under_client_sock, sendMsg);
+                    }
+				}
 				break;
 			default: break;
 		}
 	}
 	return NULL;
-}
-
-/*
-* handle ping server as new socket was init
-* @param
-* @return void
-*/
-void pingServerToConfirmBackgroundThread() {
-	mess->type = TYPE_BACKGROUND;
-	sendMessage(under_client_sock, *mess);
-}
-// connect client to server
-// parameter: client socket, server address
-// if have error, print error and exit
-void connectToServer(SocketType type){
-	if(type == UNDER_SOCK){
-		if(connect(under_client_sock, (struct sockaddr*) (&server_addr), sizeof(struct sockaddr)) < 0){
-			printf("\nError!Can not connect to sever! Client exit imediately!\n");
-			exit(0);
-		} else {
-			pingServerToConfirmBackgroundThread();
-			pthread_create(&tid, NULL, &backgroundHandle, NULL);
-		}
-	}
-	else{
-		if(connect(client_sock, (struct sockaddr*) (&server_addr), sizeof(struct sockaddr)) < 0){
-			printf("\nError!Can not connect to sever! Client exit imediately!\n");
-			exit(0);
-		}
-	}
-}
-
-// start method run on background to wait search and download file request
-void backgroundHandleStart() {
-	under_client_sock = initSock();
-	connectToServer(UNDER_SOCK);
-}
-
-// close method run on background
-void backgroundHandleEnd(){
-	close(under_client_sock);
-}
-
-/*
-* print waiting message to screen when waitng download
-* @param
-* @return void
-*/
-void printWatingMsg() {
-	printf("\n.........................Please waiting.........................\n");
 }
 
 // get username and password from keyboard to login
@@ -332,7 +217,20 @@ void loginFunc(char *current_user){
 	if(mess->type != TYPE_ERROR){
 		isOnline = 1;
 		strcpy(current_user, username);
-		backgroundHandleStart();
+		int newsock = socket(AF_INET, SOCK_STREAM, 0);
+        	if (newsock == -1 ){
+        		perror("\nError: ");
+        		exit(0);
+        	}
+        	under_client_sock = newsock;
+        	if(connect(under_client_sock, (struct sockaddr*) (&server_addr), sizeof(struct sockaddr)) < 0){
+            			printf("\nError!Can not connect to sever! Client exit imediately!\n");
+            			exit(0);
+            		} else {
+            			mess->type = TYPE_BACKGROUND;
+                        sendMessage(under_client_sock, *mess);
+            			pthread_create(&tid, NULL, &backgroundHandle, NULL);
+            		}
 		findOrCreateFolderUsername(username);
 	} else {
 		showBubbleNotify("Error: Login Failed!!");
@@ -382,7 +280,20 @@ void registerFunc(char *current_user){
 		if(mess->type != TYPE_ERROR){
 			isOnline = 1;
 			strcpy(current_user, username);
-			backgroundHandleStart();
+			int newsock = socket(AF_INET, SOCK_STREAM, 0);
+            	if (newsock == -1 ){
+            		perror("\nError: ");
+            		exit(0);
+            	}
+            	under_client_sock = newsock;
+            	if(connect(under_client_sock, (struct sockaddr*) (&server_addr), sizeof(struct sockaddr)) < 0){
+                			printf("\nError!Can not connect to sever! Client exit imediately!\n");
+                			exit(0);
+                		} else {
+                			mess->type = TYPE_BACKGROUND;
+                            sendMessage(under_client_sock, *mess);
+                			pthread_create(&tid, NULL, &backgroundHandle, NULL);
+                		}
 			findOrCreateFolderUsername(username);
 		} else {
 			showBubbleNotify("Error: Register Failed!!");
@@ -405,85 +316,9 @@ void logoutFunc(char *current_user){
 	if(mess->type != TYPE_ERROR){
 		isOnline = 0;
 		current_user[0] = '\0';
-		backgroundHandleEnd();
+		close(under_client_sock);
 	}
 	printf("%s\n", mess->payload);
-}
-
-/*
-* get show first menu of application
-* @param
-* @return void
-*/
-void menuAuthenticate() {
-	printf("\n=======================FileShareSystem==================\n");
-	printf("\n\t\t\t1 Login");
-	printf("\n\t\t\t2 Register");
-	printf("\n\t\t\t3 Exit");
-	printf("\n========================================================\n");
-	printf("\nPlease choose: ");
-}
-
-/*
-* get show main menu of application
-* @param
-* @return void
-*/
-void mainMenu() {
-	printf("\n=======================FileShareSystem==================\n");
-	printf("\n\t\t\t1 Search File In Shared System ");
-	printf("\n\t\t\t2 View Your List Files ");
-	printf("\n\t\t\t3 Create new file ");
-	printf("\n\t\t\t4 Logout ");
-	printf("\n========================================================");
-	printf("\nPlease choose: ");
-}
-
-/*
-* get check type request of authenticate
-* @param
-* @return void
-*/
-void authenticateFunc() {
-	menuAuthenticate();
-	scanf("%lc", &choose);
-	while(getchar() != '\n');
-	switch (choose){
-		case '1':
-			loginFunc(current_user);
-			break;
-		case '2':
-			registerFunc(current_user);
-			break;
-		case '3':
-			exit(0);
-		default:
-			printf("Syntax Error! Please choose again!\n");
-	}
-}
-
-/*
-* show list file of user
-* @param
-* @return void
-*/
-void showListFile() {
-	DIR *dir;
-	struct dirent *ent;
-	char folderPath[1000];
-	sprintf(folderPath, "./%s", current_user);
-	if ((dir = opendir (folderPath)) != NULL) {
-	  /* print all the files and directories within directory */
-	  while ((ent = readdir (dir)) != NULL) {
-	  	if(ent->d_name[0] != '.') {
-	  		printf ("%s\n", ent->d_name);
-	  	}
-	  }
-	  closedir (dir);
-	} else {
-	  /* could not open directory */
-	  perror ("Permission denied!!");
-	}
 }
 
 /*
@@ -510,13 +345,14 @@ int showListSelectUser(char* listUser, char* username, char* fileName) {
 		return -1;
 	}
 	char** list = str_split(listUser, '\n');
-	int i;
+	int i=0;
 	printf("\n--------------------------- List User -------------------------------\n");
 	printf("Username\t\t\tFile\t\t\tSize\n");
-	for (i = 0; *(list + i); i++)
+	while (*(list + i)!=NULL)
     {
     	char** tmp = str_split(*(list + i), ' ');
         printf("\n%d. %s\t\t\t%s\t\t\t%s", i + 1, tmp[0], fileName, tmp[1]);
+        i++;
     }
 
     char choose[10];
@@ -605,85 +441,130 @@ void handleDownloadFile(char* selectedUser,char* fileName) {
 	printf("....................Donwload Success.................. File save in %s\n", path);
 }
 
-/*
-* search file method
-* @param
-* @return void
-*/
-void handleSearchFile() {
-	char fileName[100];
-	char selectedUser[30];
-	char choose = '\0';
-	printf("Please Input File Name You Want To Search: ");
-	scanf("%[^\n]s", fileName);
-	char fullPath[100];
-	getFullPath(fileName, fullPath);
-	while(getchar() != '\n');
-	FILE *fptr;
-	fptr = fopen(fullPath, "r");
-	if(fptr != NULL) {
-		while(1) {
-			printf("\nYou have a file with same name!\n ---> Are you want to continue search? y/n: ");
-			scanf("%c", &choose);
-			while(getchar() != '\n');
-			if((choose == 'y' || (choose == 'n'))) {
-				break;
-			}
-		}
-	}
-	if(choose == 'n') {
-		return;
-	}
-	mess->type = TYPE_REQUEST_FILE;
-	strcpy(mess->payload, fileName);
-	mess->length = strlen(mess->payload);
-	sendMessage(client_sock, *mess);
-	printWatingMsg();
-	receiveMessage(client_sock, mess);
-	printf("%s\n",mess->payload);
-	if(showListSelectUser(mess->payload, selectedUser, fileName) == 1) {
-		handleDownloadFile(selectedUser, fileName);
-	}
-}
-
-/*
-* check type file request
-* @param
-* @return void
-*/
-
-
-
-void requestFileFunc() {
-	mainMenu();
-	scanf("%d", &choose);
-	while(getchar() != '\n');
-	switch (choose) {
-		case 1:
-			handleSearchFile();
-			break;
-		case 2:
-			showListFile();
-			break;
-		case 3:
-			createNewFile();
-			break;
-		case 4:
-			logoutFunc(current_user);
-			break;
-		default:
-			printf("Syntax Error! Please choose again!\n");
-	}
-}
-
 // communicate from client to server
 // send and recv message with server
 void communicateWithUser(){
 	while(1) {
 		if(!isOnline) {
-			authenticateFunc();
+			printf("\n=======================FileShareSystem==================\n");
+                printf("\n\t\t\t1 Login");
+                printf("\n\t\t\t2 Register");
+                printf("\n\t\t\t3 Exit");
+                printf("\n========================================================\n");
+                printf("\nPlease choose: ");
+            	scanf("%lc", &choose);
+            	while(getchar() != '\n');
+            	switch (choose){
+            		case '1':
+            			loginFunc(current_user);
+            			break;
+            		case '2':
+            			registerFunc(current_user);
+            			break;
+            		case '3':
+            			exit(0);
+            		default:
+            			printf("Syntax Error! Please choose again!\n");
+            	}
 		} else {
-			requestFileFunc();
+			 {
+            	printf("\n=======================FileShareSystem==================\n");
+                	printf("\n\t\t\t1 Search File In Shared System ");
+                	printf("\n\t\t\t2 View Your List Files ");
+                	printf("\n\t\t\t3 Create new file ");
+                	printf("\n\t\t\t4 Logout ");
+                	printf("\n========================================================");
+                	printf("\nPlease choose: ");
+            	scanf("%d", &choose);
+            	while(getchar() != '\n');
+            	switch (choose) {
+            		case 1:
+            			{
+                        	char fileName[100];
+                        	char selectedUser[30];
+                        	char choose = '\0';
+                        	printf("Please Input File Name You Want To Search: ");
+                        	scanf("%[^\n]s", fileName);
+                        	char fullPath[100];
+                        	getFullPath(fileName, fullPath);
+                        	while(getchar() != '\n');
+                        	FILE *fptr;
+                        	fptr = fopen(fullPath, "r");
+                        	if(fptr != NULL) {
+                        		while(1) {
+                        			printf("\nYou have a file with same name!\n ---> Are you want to continue search? y/n: ");
+                        			scanf("%c", &choose);
+                        			while(getchar() != '\n');
+                        			if((choose == 'y' || (choose == 'n'))) {
+                        				break;
+                        			}
+                        		}
+                        	}
+                        	if(choose == 'n') {
+                        		return;
+                        	}
+                        	mess->type = TYPE_REQUEST_FILE;
+                        	strcpy(mess->payload, fileName);
+                        	mess->length = strlen(mess->payload);
+                        	sendMessage(client_sock, *mess);
+                        	printf("\n.........................Please waiting.........................\n");
+                        	receiveMessage(client_sock, mess);
+                        	printf("%s\n",mess->payload);
+                        	if(showListSelectUser(mess->payload, selectedUser, fileName) == 1) {
+                        		handleDownloadFile(selectedUser, fileName);
+                        	}
+                        }
+            			break;
+            		case 2:
+            			{
+                        	DIR *dir;
+                        	struct dirent *ent;
+                        	char folderPath[1000];
+                        	sprintf(folderPath, "./%s", current_user);
+                        	if ((dir = opendir (folderPath)) != NULL) {
+                        	  /* print all the files and directories within directory */
+                        	  while ((ent = readdir (dir)) != NULL) {
+                        	  	if(ent->d_name[0] != '.') {
+                        	  		printf ("%s\n", ent->d_name);
+                        	  	}
+                        	  }
+                        	  closedir (dir);
+                        	} else {
+                        	  /* could not open directory */
+                        	  perror ("Permission denied!!");
+                        	}
+                        }
+            			break;
+            		case 3:{
+            			char data[DATA_SIZE];
+                        FILE * fptr;
+                        char file_name[100];
+                        printf("Please enter the file name: ");
+                        scanf("%s",file_name);
+                        char current_user_path[100];
+                        strcpy(current_user_path,current_user);
+                        strcat(current_user_path,"/");
+                        fptr = fopen(strcat(current_user_path,file_name), "w");
+                        if(fptr == NULL)
+                           {
+                                printf("Unable to create file.\n");
+                                exit(0);
+                            }
+
+                        printf("Enter contents to store in file : \n");
+                        scanf("%s", data);
+                        fprintf(fptr, "%s", data);
+                        fclose(fptr);
+                        printf("%s...",data);
+                        printf("File saved successfully.\n");
+            			break;}
+            		case 4:
+            			logoutFunc(current_user);
+            			break;
+            		default:
+            			printf("Syntax Error! Please choose again!\n");
+            	}
+            }
 		}
 	}
 }
